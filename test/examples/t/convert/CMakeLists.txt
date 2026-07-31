@@ -35,7 +35,7 @@ set_tests_properties(examples_convert_xml_opl_long2 PROPERTIES
 
 
 add_test(NAME examples_convert_xml_pbf
-         COMMAND osmium_convert -t pbf ${CMAKE_CURRENT_SOURCE_DIR}/data.osm /dev/null)
+         COMMAND osmium_convert -t pbf ${CMAKE_CURRENT_SOURCE_DIR}/data.osm ignored.osm.pbf)
 
 
 add_test(NAME examples_convert_xml_xml
