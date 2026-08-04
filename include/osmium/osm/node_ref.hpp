@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <iosfwd>
 
 namespace osmium {
@@ -233,5 +234,26 @@ namespace osmium {
     }; // struct location_less
 
 } // namespace osmium
+
+namespace std {
+
+// This pragma is a workaround for a bug in an old libc implementation
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmismatched-tags"
+#endif
+    template <>
+    struct hash<osmium::NodeRef> {
+        using argument_type = osmium::NodeRef;
+        using result_type = size_t;
+        size_t operator()(const osmium::NodeRef& nr) const noexcept {
+            return hash<osmium::object_id_type>{}(nr.ref());
+        }
+    };
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
+} // namespace std
 
 #endif // OSMIUM_OSM_NODE_REF_HPP

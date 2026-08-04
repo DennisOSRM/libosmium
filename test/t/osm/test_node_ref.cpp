@@ -1,5 +1,8 @@
 #include "catch.hpp"
 
+#include <functional>
+#include <unordered_set>
+
 #include <osmium/builder/attr.hpp>
 #include <osmium/memory/buffer.hpp>
 #include <osmium/osm/node_ref.hpp>
@@ -16,7 +19,7 @@ TEST_CASE("Construct a NodeRef with an id") {
     REQUIRE(node_ref.ref() == 7);
 }
 
-TEST_CASE("Equality comparison fo NodeRefs") {
+TEST_CASE("Equality comparison of NodeRefs") {
     const osmium::NodeRef node_ref1{7, {1.2, 3.4}};
     const osmium::NodeRef node_ref2{7, {1.4, 3.1}};
     const osmium::NodeRef node_ref3{9, {1.2, 3.4}};
@@ -25,6 +28,31 @@ TEST_CASE("Equality comparison fo NodeRefs") {
     REQUIRE_FALSE(osmium::location_equal()(node_ref1, node_ref2));
     REQUIRE_FALSE(osmium::location_equal()(node_ref2, node_ref3));
     REQUIRE(      osmium::location_equal()(node_ref1, node_ref3));
+}
+
+TEST_CASE("Hash of NodeRefs") {
+    const osmium::NodeRef node_ref1{7, {1.2, 3.4}};
+    const osmium::NodeRef node_ref2{7, {1.4, 3.1}};
+    const osmium::NodeRef node_ref3{9, {1.2, 3.4}};
+
+    const std::hash<osmium::NodeRef> hasher;
+
+    SECTION("Equal NodeRefs have equal hashes") {
+        REQUIRE(hasher(node_ref1) == hasher(node_ref2));
+    }
+
+    SECTION("Different ref yields different hash") {
+        REQUIRE(hasher(node_ref1) != hasher(node_ref3));
+    }
+
+    SECTION("Hash is usable in unordered containers") {
+        std::unordered_set<osmium::NodeRef> set;
+        set.insert(node_ref1);
+        set.insert(node_ref2);
+        REQUIRE(set.size() == 1);
+        set.insert(node_ref3);
+        REQUIRE(set.size() == 2);
+    }
 }
 
 TEST_CASE("Set location on a NodeRef") {
